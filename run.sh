@@ -1,3 +1,3 @@
-cd /JMG/examples/JMG
+cd /JMG
 make
-/JMG/bin/Linux/JMG 
+bin/Linux/JMG 
