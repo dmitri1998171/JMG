@@ -5,8 +5,20 @@
 
 #include "wrapper/irrLib.hpp"
 
+#define ARR_SIZE 10
+
+enum map_tiles_enum
+{
+	STRAIGHT,
+	ANGLE,
+	HOLE 
+};
+
 int main() {
-	context.device = createDevice(EDT_SOFTWARE, dimension2d<u32>(600, 400), 16, false, false, false, &context.receiver);
+	int fps = 1;
+	IMeshSceneNode* map_tile[ARR_SIZE];
+
+	context.device = createDevice(EDT_SOFTWARE, dimension2d<u32>(640, 480), 16, false, false, false, &context.receiver);
 
 	if (!context.device)
 		return 1; 
@@ -14,51 +26,37 @@ int main() {
 	context.driver = context.device->getVideoDriver();
 	context.smgr = context.device->getSceneManager();
 
-	context.smgr->getGUIEnvironment()->addStaticText(L"Press Space to hide occluder.", recti(10,10, 200,50));
+	ICameraSceneNode* camera = context.smgr->addCameraSceneNodeFPS();
+	camera->setPosition(vector3df(0, 30, 0));
+	camera->setTarget(vector3df(0, 0, 30));
 
-	ISceneNode * node = context.smgr->addSphereSceneNode(10, 64);
-	if (node) {
-		node->setPosition(vector3df(0,0,60));
-		node->setMaterialTexture(0, context.driver->getTexture("media/wall.bmp"));
-		node->setMaterialFlag(EMF_LIGHTING, false);
+	srand(time(0));
+	int currentTile = 0;
+
+	for (int i = 0; i < ARR_SIZE; i++) {
+		currentTile = 0 + rand() % 2;
+		
+		cout << "currentTile: " << currentTile << endl;
+
+		if(currentTile == STRAIGHT)
+			map_tile[i] = oLoadStatModel("media/Converted/straight.obj", "", vector3df(0, 0, 30 + (i * 11)), false);
+		
+		if(currentTile == ANGLE)
+			map_tile[i] = oLoadStatModel("media/Converted/angle.obj", "", vector3df(0, 0, 30 + (i * 11)), false);
 	}
-
-	ISceneNode* plane = context.smgr->addMeshSceneNode(context.smgr->addHillPlaneMesh(
-		"plane", dimension2df(10,10), dimension2du(2,2)), 0, -1,
-		vector3df(0,0,20), vector3df(270,0,0));
-
-	if (plane) {
-		plane->setMaterialTexture(0, context.driver->getTexture("media/t351sml.jpg"));
-		plane->setMaterialFlag(EMF_LIGHTING, false);
-		plane->setMaterialFlag(EMF_BACK_FACE_CULLING, true);
-	}
-
-	context.driver->addOcclusionQuery(node, ((IMeshSceneNode*)node)->getMesh());
-
-	context.smgr->addCameraSceneNode();
+	
 	int lastFPS = -1;
 	u32 timeNow = context.device->getTimer()->getTime();
-	bool nodeVisible=true;
 
 	while(context.device->run()) {
-		plane->setVisible(!context.receiver.IsKeyDown(KEY_SPACE));
-
 		context.driver->beginScene(true, true, SColor(255,113,113,133));
-	
-		node->setVisible(nodeVisible);
+		
 		context.smgr->drawAll();
 		context.smgr->getGUIEnvironment()->drawAll();
 
-		if (context.device->getTimer()->getTime()-timeNow>100) {
-			context.driver->runAllOcclusionQueries(false);
-			context.driver->updateAllOcclusionQueries();
-			nodeVisible=context.driver->getOcclusionQueryResult(node)>0;
-			timeNow=context.device->getTimer()->getTime();
-		}
-
 		context.driver->endScene();
 
-		int fps = context.driver->getFPS();
+		fps = context.driver->getFPS();
 
 		if (lastFPS != fps) {
 			stringw tmp(L"OcclusionQuery Example [");
@@ -72,7 +70,6 @@ int main() {
 	}
 
 	context.device->drop();
-	
 	return 0;
 }
 
