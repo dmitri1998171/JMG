@@ -2,11 +2,12 @@
 # It's usually sufficient to change just the target name and source file list
 # and be sure that CXX is set to a valid compiler
 Target = JMG
-Sources = source/main.cpp
+Sources = source/main.cpp 
+EXT = include/wrapper/*.cpp 
 
 # general compiler settings
-CPPFLAGS = -I./include -I/usr/X11R6/include
-CXXFLAGS = -O3 -ffast-math
+CPPFLAGS = -I./include -I/usr/X11R6/include -I./include/wrapper
+CXXFLAGS = -O3 -ffast-math -std=c++17
 #CXXFLAGS = -g -Wall
 
 #default target is Linux
@@ -28,7 +29,7 @@ DESTPATH = ./bin/$(SYSTEM)/$(Target)$(SUF)
 
 all_linux all_win32:
 	$(warning Building...)
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(Sources) -o $(DESTPATH) $(LDFLAGS)
+	clear && $(CXX) $(CPPFLAGS) $(CXXFLAGS) $(Sources) $(EXT) -o $(DESTPATH) $(LDFLAGS)
 
 clean: clean_linux clean_win32
 	$(warning Cleaning...)
