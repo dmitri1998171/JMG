@@ -1,4 +1,5 @@
 /bin
 .DS_Store
+TODO.txt
 *.blend1
 /.vscode
