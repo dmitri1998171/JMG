@@ -16,14 +16,11 @@ enum map_tiles_enum {
 };
 
 void mapGenerator() {
-	int curr_x = 0, curr_z = 0, turn = 0;
-
-	int currentTileArr[ARR_SIZE] = {0, 1, 0, 0, 0, 2};
-
-	int currentTile = 0;
-	int previousTile = -1;
-
 	char* path;
+	int currentTile = 0, prev_tile = 0;
+	int curr_x = 0, curr_z = 0;
+	int turn = 0, turn_off = 0;
+	int currentTileArr[ARR_SIZE] = {0, 1, 1, 0, 0, 2};
 	vector3df currPosition, currRotation;
 	IMeshSceneNode* map_tile[ARR_SIZE];
 
@@ -37,7 +34,8 @@ void mapGenerator() {
 
 		currentTile = currentTileArr[i];
 
-		cout << "curr_x: " << curr_x << "  curr_z: " << curr_z << endl;
+		cout << "curr_x: " << curr_x << "  curr_z: " << curr_z;
+		// cout << "  curr_tile: " << currentTile << "  prev_tile: " << prev_tile << endl;
 
 		if(i == 0) 					// Первый элемент - всегда прямая
 			currentTile = STRAIGHT;
@@ -47,26 +45,39 @@ void mapGenerator() {
 
 		if(currentTile == STRAIGHT) {
 			path = "media/Converted/Main/straight.obj";
-			currPosition = vector3df(0, 0, (i * TILE_SIZE));
 
-			if(turn) {
+			if(turn) {		// Если трасса повернула
 				currPosition = vector3df((curr_x * TILE_SIZE) - (TILE_SIZE / 3), 0, (curr_z * TILE_SIZE)  - (TILE_SIZE / 3));
 				currRotation = vector3df(0, 90, 0);
+				curr_x++;
 			}
-			curr_x++;
+			else {
+				if(turn_off) {
+					currPosition = vector3df((curr_x * TILE_SIZE) - (TILE_SIZE / 2), 0, (curr_z * TILE_SIZE) - (TILE_SIZE / 2));
+				}
+				else {
+					currPosition = vector3df((curr_x * TILE_SIZE), 0, (curr_z * TILE_SIZE));
+				}
+
+				curr_z++;
+			}
 		}
 
 		if(currentTile == ANGLE) {
 			path = "media/Converted/Main/angle.obj";
-			currPosition = vector3df(0, 0, (i * TILE_SIZE) - (TILE_SIZE / 3));
-			curr_z++;
 
-			if(turn){
-				currPosition = vector3df((curr_x * TILE_SIZE) - (TILE_SIZE / 3), 0, (curr_z * TILE_SIZE) - (TILE_SIZE / 3));
+			if(turn) {	// Если трасса повернула (предыдущ эл-т был углом)
+				currPosition = vector3df((curr_x * TILE_SIZE) - (TILE_SIZE / 2), 0, (curr_z * TILE_SIZE) - (TILE_SIZE / 3));
+				currRotation = vector3df(0, 180, 0);
 				turn = 0;
+				turn_off = 1;
+				curr_z++;
 			}
-
-			turn = 1;
+			else {
+				currPosition = vector3df((curr_x * TILE_SIZE), 0, (curr_z * TILE_SIZE) - (TILE_SIZE / 3));
+				turn = 1;
+				curr_x++;
+			}
 		}
 
 		if(currentTile == HOLE) {
@@ -74,8 +85,12 @@ void mapGenerator() {
 
 			if(turn)
 				currPosition = vector3df((curr_x * TILE_SIZE) - (TILE_SIZE / 2) - 1, 0, (curr_z * TILE_SIZE)  - (TILE_SIZE / 3));
-			else
-				currPosition = vector3df(0, 0, (i * TILE_SIZE) - (TILE_SIZE / 3));
+			else {
+				if(turn_off)
+					currPosition = vector3df((curr_x * TILE_SIZE) - (TILE_SIZE / 2), 0, (curr_z * TILE_SIZE) - TILE_SIZE);
+				else
+					currPosition = vector3df((curr_x * TILE_SIZE), 0, (curr_z * TILE_SIZE) - (TILE_SIZE / 3));
+			}
 		}
 		
 		
@@ -103,7 +118,8 @@ void mapGenerator() {
 
 		map_tile[i] = oLoadStatModel(path, "", currPosition, false);
 		map_tile[i]->setRotation(currRotation);
-		previousTile = currentTile;
+		
+		prev_tile = currentTile;
 	}
 }
 
