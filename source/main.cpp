@@ -15,156 +15,78 @@ enum map_tiles_enum {
 	HOLE 
 };
 
-// void mapGenerator() {
-// 	char* path;
-// 	int currentTile = 0, prev_tile = 0;
-// 	int curr_x = 0, curr_z = 0;
-// 	int turn = 0, turn_off = 0;
-// 	int currentTileArr[ARR_SIZE] = {0, 1, 1, 0, 0, 2};
-// 	vector3df currPosition, currRotation;
-// 	IMeshSceneNode* map_tile[ARR_SIZE];
-
-// 	// for (int i = 0; i < ARR_SIZE; i++) {
-// 	// 	currentTile = 0 + rand() % (sizeof(map_tiles_enum) - 2);
-// 	// 	currentTileArr[i] = currentTile;
-// 	// 	cout << currentTile << endl;
-// 	// }
-
-// 	for (int i = 0; i < ARR_SIZE; i++) {
-
-// 		currentTile = currentTileArr[i];
-
-// 		cout << "curr_x: " << curr_x << "  curr_z: " << curr_z;
-// 		// cout << "  curr_tile: " << currentTile << "  prev_tile: " << prev_tile << endl;
-
-// 		if(i == 0) 					// Первый элемент - всегда прямая
-// 			currentTile = STRAIGHT;
-
-// 		if (i == ARR_SIZE - 1) 		// Последний элемент - всегда лунка
-// 			currentTile = HOLE;
-
-// 		if(currentTile == STRAIGHT) {
-// 			path = "media/Converted/Main/straight.obj";
-
-// 			if(turn) {		// Если трасса повернула
-// 				currPosition = vector3df((curr_x * TILE_SIZE) - (TILE_SIZE / 3), 0, (curr_z * TILE_SIZE)  - (TILE_SIZE / 3));
-// 				currRotation = vector3df(0, 90, 0);
-// 				curr_x++;
-// 			}
-// 			else {
-// 				if(turn_off) {
-// 					currPosition = vector3df((curr_x * TILE_SIZE) - (TILE_SIZE / 2), 0, (curr_z * TILE_SIZE) - (TILE_SIZE / 2));
-// 				}
-// 				else {
-// 					currPosition = vector3df((curr_x * TILE_SIZE), 0, (curr_z * TILE_SIZE));
-// 				}
-
-// 				curr_z++;
-// 			}
-// 		}
-
-// 		if(currentTile == ANGLE) {
-// 			path = "media/Converted/Main/angle.obj";
-
-// 			if(turn) {	// Если трасса повернула (предыдущ эл-т был углом)
-// 				currPosition = vector3df((curr_x * TILE_SIZE) - (TILE_SIZE / 2), 0, (curr_z * TILE_SIZE) - (TILE_SIZE / 3));
-// 				currRotation = vector3df(0, 180, 0);
-// 				turn = 0;
-// 				turn_off = 1;
-// 				curr_z++;
-// 			}
-// 			else {
-// 				currPosition = vector3df((curr_x * TILE_SIZE), 0, (curr_z * TILE_SIZE) - (TILE_SIZE / 3));
-// 				turn = 1;
-// 				curr_x++;
-// 			}
-// 		}
-
-// 		if(currentTile == HOLE) {
-// 			path = "media/Converted/Main/hole.obj";
-
-// 			if(turn)
-// 				currPosition = vector3df((curr_x * TILE_SIZE) - (TILE_SIZE / 2) - 1, 0, (curr_z * TILE_SIZE)  - (TILE_SIZE / 3));
-// 			else {
-// 				if(turn_off)
-// 					currPosition = vector3df((curr_x * TILE_SIZE) - (TILE_SIZE / 2), 0, (curr_z * TILE_SIZE) - TILE_SIZE);
-// 				else
-// 					currPosition = vector3df((curr_x * TILE_SIZE), 0, (curr_z * TILE_SIZE) - (TILE_SIZE / 3));
-// 			}
-// 		}
-		
-		
-// 		// if(previousTile == ANGLE) {
-// 		// 	if(currentTile == ANGLE) {
-// 		// 		currPosition = vector3df((curr_z * TILE_SIZE) - (TILE_SIZE / 2), 0, ((i - 1) * TILE_SIZE) - (TILE_SIZE / 3));
-// 		// 		currRotation = vector3df(0, 180, 0);
-// 		// 		// turn = 0;
-// 		// 	}
-
-// 		// 	if(currentTile == STRAIGHT) {
-// 		// 		currPosition = vector3df((curr_z * TILE_SIZE) - (TILE_SIZE / 3), 0, ((i - 1) * TILE_SIZE) - (TILE_SIZE / 3));
-// 		// 		currRotation = vector3df(0, 90, 0);
-// 		// 	}
-
-// 		// 	if(currentTile == HOLE) {
-// 		// 		currPosition = vector3df(((curr_z - 1) * TILE_SIZE) - (TILE_SIZE / 2), 0, ((i - 1) * TILE_SIZE) - (TILE_SIZE - (TILE_SIZE / 5)));
-// 		// 	}
-
-// 		// curr_z++;
-// 		// 	turn = 1;
-// 		// }
-// 		// else 
-// 		// 	currRotation = vector3df(0, 0, 0);
-
-// 		map_tile[i] = oLoadStatModel(path, "", currPosition, false);
-// 		map_tile[i]->setRotation(currRotation);
-		
-// 		prev_tile = currentTile;
-// 	}
-// }
-
 void mapGenerator() {
 	char* path;
-	int currentTile = 0, prev_tile = 0;
-	// int curr_x = 0, curr_z = 0;
-	int turn = 0, turn_off = 0;
-	int currentTileArr[ARR_SIZE] = {0, 1, 0, 0, 0, 2};
+	int currentTile = 0, prev_tile = 0, turn = 0;
+	f32 x, y, z;
+	int currentTileArr[ARR_SIZE] = {0, 1, 1, 0, 0, 2};
 	vector3df currPosition, currRotation;
 	IMeshSceneNode* map_tile[ARR_SIZE];
+
+	for (int i = 0; i < ARR_SIZE; i++)
+		currentTileArr[i] = 0 + rand() % (sizeof(map_tiles_enum) - 2);
 
 	for (int i = 0; i < ARR_SIZE; i++) {
 		currentTile = currentTileArr[i];
 
-		if(currentTile == STRAIGHT) {
-			path = "media/Converted/Main/straight.obj";
-			currRotation = vector3df(0, 90, 0);
+		if(i == ARR_SIZE - 1) {
+			currentTile = HOLE;
 		}
-
-		if(currentTile == ANGLE) {
-			path = "media/Converted/Main/angle.obj";
-			turn++;
-
-			if(turn > 1) turn = 0;
-		}
-
-		if(currentTile == HOLE)
-			path = "media/Converted/Main/hole.obj";
-
-		if(!i)
+		
+		if(!i) {
+			currentTile = STRAIGHT;
 			currPosition = vector3df(0, 0, 0);
+		}
 		else {
 			if(turn) {
-				currPosition = map_tile[i - 1]->getPosition() + vector3df(TILE_SIZE, 0, 0);
+				if(prev_tile == ANGLE || currentTile == ANGLE || currentTile == HOLE)
+					x = map_tile[i - 1]->getPosition().X + TILE_SIZE - (TILE_SIZE / 3);
+				else
+					x = map_tile[i - 1]->getPosition().X + TILE_SIZE;
+				currRotation = vector3df(0, 90, 0);
 			}
 			else
-				currPosition = map_tile[i - 1]->getPosition() + vector3df(0, 0, TILE_SIZE);
+				if(prev_tile == ANGLE || currentTile == ANGLE || currentTile == HOLE)
+					z = map_tile[i - 1]->getPosition().Z + TILE_SIZE - (TILE_SIZE / 3);
+				else
+					z = map_tile[i - 1]->getPosition().Z + TILE_SIZE;
 		}
 
+		if(currentTile == STRAIGHT) 
+			path = "media/Converted/Main/straight.obj";
+			
+		if(currentTile == HOLE) 
+			path = "media/Converted/Main/hole.obj";
+			
+		if(currentTile == ANGLE) {
+			path = "media/Converted/Main/angle.obj";
+
+			if(prev_tile == ANGLE) {
+				if(turn)
+					x = map_tile[i - 1]->getPosition().X + (TILE_SIZE / 2);
+				else
+					z = map_tile[i - 1]->getPosition().Z + (TILE_SIZE / 2);
+			}
+
+			turn++;
+			
+			if(turn > 1) { 
+				turn = 0;
+				currRotation += vector3df(0, 90, 0);
+			}
+		}
+
+		currPosition = vector3df(x, y, z);
 		map_tile[i] = oLoadStatModel(path, "", currPosition, false);
 		map_tile[i]->setRotation(currRotation);
 
 		prev_tile = currentTile;
 	}
+
+	for (int i = 0; i < ARR_SIZE; i++)
+		cout << currentTileArr[i] << " ";
+
+	cout << endl;
 }
 
 int main() {
