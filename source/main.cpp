@@ -23,33 +23,51 @@ void mapGenerator() {
 	vector3df currPosition, currRotation;
 	IMeshSceneNode* map_tile[ARR_SIZE];
 
-	for (int i = 0; i < ARR_SIZE; i++)
-		currentTileArr[i] = 0 + rand() % (sizeof(map_tiles_enum) - 2);
+	// for (int i = 0; i < ARR_SIZE; i++)
+	// 	currentTileArr[i] = 0 + rand() % (sizeof(map_tiles_enum) - 2);
 
 	for (int i = 0; i < ARR_SIZE; i++) {
 		currentTile = currentTileArr[i];
 
 		if(i == ARR_SIZE - 1) {
 			currentTile = HOLE;
+			currentTileArr[i] = currentTile;
 		}
 		
 		if(!i) {
 			currentTile = STRAIGHT;
+			currentTileArr[i] = currentTile;
 			currPosition = vector3df(0, 0, 0);
 		}
 		else {
-			if(turn) {
+			if(turn > 0) {
+				x = map_tile[i - 1]->getPosition().X;
+
 				if(prev_tile == ANGLE || currentTile == ANGLE || currentTile == HOLE)
-					x = map_tile[i - 1]->getPosition().X + TILE_SIZE - (TILE_SIZE / 3);
+					x += TILE_SIZE - (TILE_SIZE / 3);
 				else
-					x = map_tile[i - 1]->getPosition().X + TILE_SIZE;
+					x += TILE_SIZE;
+
 				currRotation = vector3df(0, 90, 0);
 			}
-			else
+			else if(turn < 0) {
+				x = map_tile[i - 1]->getPosition().X;
+
 				if(prev_tile == ANGLE || currentTile == ANGLE || currentTile == HOLE)
-					z = map_tile[i - 1]->getPosition().Z + TILE_SIZE - (TILE_SIZE / 3);
+					x -= TILE_SIZE - (TILE_SIZE / 3);
 				else
-					z = map_tile[i - 1]->getPosition().Z + TILE_SIZE;
+					x -= TILE_SIZE;
+
+				currRotation = vector3df(0, 90 * turn, 0);
+			}
+			else {
+				z = map_tile[i - 1]->getPosition().Z;
+
+				if(prev_tile == ANGLE || currentTile == ANGLE || currentTile == HOLE)
+					z += TILE_SIZE - (TILE_SIZE / 3);
+				else
+					z += TILE_SIZE;
+			}
 		}
 
 		if(currentTile == STRAIGHT) 
@@ -61,18 +79,30 @@ void mapGenerator() {
 		if(currentTile == ANGLE) {
 			path = "media/Converted/Main/angle.obj";
 
+			// Два поворота подряд
 			if(prev_tile == ANGLE) {
-				if(turn)
-					x = map_tile[i - 1]->getPosition().X + (TILE_SIZE / 2);
+				if(turn > 0)
+					x = (map_tile[i - 1]->getPosition().X + (TILE_SIZE / 2));
+				else if(turn < 0) 
+					x = (map_tile[i - 1]->getPosition().X + (TILE_SIZE / 2)) * (-1);
 				else
 					z = map_tile[i - 1]->getPosition().Z + (TILE_SIZE / 2);
 			}
 
-			turn++;
+			if(0 + rand() % 2) {
+				turn--;
+				currRotation += vector3df(0, 90, 0);
+			}else {
+				turn++;
+			}
 			
 			if(turn > 1) { 
 				turn = 0;
 				currRotation += vector3df(0, 90, 0);
+			}
+			if(turn < -1) { 
+				turn = 0;
+				currRotation = vector3df(0, -90, 0);
 			}
 		}
 
@@ -80,6 +110,7 @@ void mapGenerator() {
 		map_tile[i] = oLoadStatModel(path, "", currPosition, false);
 		map_tile[i]->setRotation(currRotation);
 
+		currRotation = vector3df(0, 0, 0);
 		prev_tile = currentTile;
 	}
 
