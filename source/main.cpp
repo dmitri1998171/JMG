@@ -16,7 +16,8 @@ enum map_tiles_enum {
 };
 
 void mapGenerator() {
-	char* path;
+	std::string base_path = "media/Converted/Main/";
+	std::string path;
 	int currentTile = 0, prev_tile = 0, turn = 0;
 	f32 x, y, z;
 	int currentTileArr[ARR_SIZE] = {0, 1, 1, 0, 0, 2};
@@ -71,13 +72,13 @@ void mapGenerator() {
 		}
 
 		if(currentTile == STRAIGHT) 
-			path = "media/Converted/Main/straight.obj";
+			path.append(base_path + "straight.obj");
 			
 		if(currentTile == HOLE) 
-			path = "media/Converted/Main/hole.obj";
-			
+			path.append(base_path + "hole.obj");
+
 		if(currentTile == ANGLE) {
-			path = "media/Converted/Main/angle.obj";
+			path.append(base_path + "angle.obj");
 
 			// Два поворота подряд
 			if(prev_tile == ANGLE) {
@@ -107,11 +108,12 @@ void mapGenerator() {
 		}
 
 		currPosition = vector3df(x, y, z);
-		map_tile[i] = oLoadStatModel(path, "", currPosition, false);
+		map_tile[i] = oLoadStatModel(path.c_str(), "", currPosition, false);
 		map_tile[i]->setRotation(currRotation);
 
 		currRotation = vector3df(0, 0, 0);
 		prev_tile = currentTile;
+		path.clear();
 	}
 
 	for (int i = 0; i < ARR_SIZE; i++)
