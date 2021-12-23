@@ -12,15 +12,19 @@
 enum map_tiles_enum {
 	STRAIGHT,
 	ANGLE,
+	HILL,
+	RISE_15,
+	RISE_30,
+	RISE_45,
 	HOLE 
 };
 
 void mapGenerator() {
-	std::string base_path = "media/Converted/Main/";
+	std::string base_path = "media/Converted/";
 	std::string path;
-	int currentTile = 0, prev_tile = 0, turn = 0;
-	f32 x, y, z;
-	int currentTileArr[ARR_SIZE] = {0, 1, 1, 0, 0, 2};
+	int curr_tile = 0, prev_tile = 0, turn = 0;
+	f32 x = 0, y = 0, z = 0;
+	int currentTileArr[ARR_SIZE] = {STRAIGHT, RISE_45, STRAIGHT, STRAIGHT, STRAIGHT, HOLE};
 	vector3df currPosition, currRotation;
 	IMeshSceneNode* map_tile[ARR_SIZE];
 
@@ -28,23 +32,23 @@ void mapGenerator() {
 	// 	currentTileArr[i] = 0 + rand() % (sizeof(map_tiles_enum) - 2);
 
 	for (int i = 0; i < ARR_SIZE; i++) {
-		currentTile = currentTileArr[i];
+		curr_tile = currentTileArr[i];
 
 		if(i == ARR_SIZE - 1) {
-			currentTile = HOLE;
-			currentTileArr[i] = currentTile;
+			curr_tile = HOLE;
+			currentTileArr[i] = curr_tile;
 		}
 		
 		if(!i) {
-			currentTile = STRAIGHT;
-			currentTileArr[i] = currentTile;
+			curr_tile = STRAIGHT;
+			currentTileArr[i] = curr_tile;
 			currPosition = vector3df(0, 0, 0);
 		}
 		else {
 			if(turn > 0) {
 				x = map_tile[i - 1]->getPosition().X;
 
-				if(prev_tile == ANGLE || currentTile == ANGLE || currentTile == HOLE)
+				if(prev_tile == ANGLE || curr_tile == ANGLE || curr_tile == HOLE)
 					x += TILE_SIZE - (TILE_SIZE / 3);
 				else
 					x += TILE_SIZE;
@@ -54,7 +58,7 @@ void mapGenerator() {
 			else if(turn < 0) {
 				x = map_tile[i - 1]->getPosition().X;
 
-				if(prev_tile == ANGLE || currentTile == ANGLE || currentTile == HOLE)
+				if(prev_tile == ANGLE || curr_tile == ANGLE || curr_tile == HOLE)
 					x -= TILE_SIZE - (TILE_SIZE / 3);
 				else
 					x -= TILE_SIZE;
@@ -64,21 +68,24 @@ void mapGenerator() {
 			else {
 				z = map_tile[i - 1]->getPosition().Z;
 
-				if(prev_tile == ANGLE || currentTile == ANGLE || currentTile == HOLE)
+				if(prev_tile == ANGLE || curr_tile == ANGLE || curr_tile == HOLE)
 					z += TILE_SIZE - (TILE_SIZE / 3);
 				else
 					z += TILE_SIZE;
 			}
 		}
 
-		if(currentTile == STRAIGHT) 
-			path.append(base_path + "straight.obj");
+		if(curr_tile == STRAIGHT) 
+			path.append(base_path + "Main/" + "straight.obj");
 			
-		if(currentTile == HOLE) 
-			path.append(base_path + "hole.obj");
+		if(curr_tile == HOLE) 
+			path.append(base_path + "Main/" + "hole.obj");
 
-		if(currentTile == ANGLE) {
-			path.append(base_path + "angle.obj");
+		if(curr_tile == HILL) 
+			path.append(base_path + "Main/" + "hill.obj");
+
+		if(curr_tile == ANGLE) {
+			path.append(base_path + "Main/" + "angle.obj");
 
 			// Два поворота подряд
 			if(prev_tile == ANGLE) {
@@ -108,17 +115,32 @@ void mapGenerator() {
 		}
 
 		currPosition = vector3df(x, y, z);
+
+		// условие подьема проверяются после установки текущ. позиции т.к задает высоту для след. эл-та
+
+		if(curr_tile == RISE_15) {
+			path.append(base_path + "Rise/" + "rise_15.obj");
+			y += 2.2;	// ?
+		}
+		
+		if(curr_tile == RISE_30) {
+			path.append(base_path + "Rise/" + "rise_30.obj");
+			y += 4.7;	// ?
+		}
+
+		if(curr_tile == RISE_45) {
+			path.append(base_path + "Rise/" + "rise_45.obj");
+			y += 8.2;	// ?
+		}
+
 		map_tile[i] = oLoadStatModel(path.c_str(), "", currPosition, false);
 		map_tile[i]->setRotation(currRotation);
 
 		currRotation = vector3df(0, 0, 0);
-		prev_tile = currentTile;
+		prev_tile = curr_tile;
 		path.clear();
 	}
-
-	for (int i = 0; i < ARR_SIZE; i++)
-		cout << currentTileArr[i] << " ";
-
+	
 	cout << endl;
 }
 
@@ -150,7 +172,7 @@ int main() {
 	// Camera and cursor
 	ICameraSceneNode* camera = context.smgr->addCameraSceneNodeFPS();
 	// camera->setParent(ball);
-	camera->setPosition(ball->getPosition() + vector3df(0, 50, -15));
+	camera->setPosition(ball->getPosition() + vector3df(35, 0, 0));
 	camera->setTarget(ball->getPosition());
 
 	context.device->getCursorControl()->setVisible(false);
