@@ -28,8 +28,8 @@ void mapGenerator() {
 	vector3df currPosition, currRotation;
 	IMeshSceneNode* map_tile[ARR_SIZE];
 
-	// for (int i = 0; i < ARR_SIZE; i++)
-	// 	currentTileArr[i] = 0 + rand() % (sizeof(map_tiles_enum) - 2);
+	for (int i = 0; i < ARR_SIZE; i++)
+		currentTileArr[i] = 0 + rand() % (sizeof(map_tiles_enum) - 2);
 
 	for (int i = 0; i < ARR_SIZE; i++) {
 		curr_tile = currentTileArr[i];
